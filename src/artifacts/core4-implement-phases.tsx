@@ -18,19 +18,29 @@ type Dimension = {
   secondaryMetrics: string[];
 };
 
-// Add new type for metric details
+// Enhanced MetricDetail type with optional benchmarks
 type MetricDetail = {
   name: string;
   description: string;
   examples: string[];
   bestPractices?: string[];
+  benchmarks?: {
+    [key: string]: string;
+  };
+  dimensions?: string[];  // Optional dimensions array for DXI metric
+};
+
+// Type for the metricDetails object
+type MetricDetailsMap = {
+  [key: string]: MetricDetail;
 };
 
 export default function DXCoreFramework() {
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState('roles');
+  const [activeTab, setActiveTab] = useState<'why' | 'roles' | 'metrics' | 'core4'>('why');
   const [activeDimension, setActiveDimension] = useState<string | null>(null);
   const [selectedMetric, setSelectedMetric] = useState<string | null>(null);
+  const [popupPosition, setPopupPosition] = useState<{ top: number; left: number } | null>(null);
   const expandedCardRef = useRef<HTMLDivElement>(null);
 
   // Handle clicks outside the expanded card
@@ -38,6 +48,8 @@ export default function DXCoreFramework() {
     function handleClickOutside(event: MouseEvent) {
       if (expandedCardRef.current && !expandedCardRef.current.contains(event.target as Node)) {
         setExpandedCard(null);
+        setSelectedMetric(null);
+        setPopupPosition(null);
       }
     }
 
@@ -345,88 +357,357 @@ export default function DXCoreFramework() {
     }
   ];
 
-  // Add metric details data
-  const metricDetails: { [key: string]: MetricDetail } = {
-    'Ease of delivery': {
-      name: 'Ease of delivery',
-      description: 'Đánh giá mức độ dễ dàng trong việc triển khai mã vào môi trường sản xuất. Ví dụ như các đường ống CI/CD tự động cho phép nhà phát triển triển khai tính năng mới chỉ với một lệnh.',
+  // Add metric details data with proper typing
+  const metricDetails: MetricDetailsMap = {
+    // SPEED DIMENSION METRICS
+    'Diffs per engineer': {
+      name: 'Diffs per engineer',
+      description: 'A measurement of the number of code changes (pull requests or commits) an engineer produces within a given time period. This is the key metric for the Speed dimension, providing a direct quantification of delivery velocity.',
       examples: [
-        'Tự động hóa quy trình triển khai',
-        'Kiểm tra tự động trước khi triển khai',
-        'Khả năng rollback dễ dàng',
-        'Môi trường staging giống production'
+        'Average PRs merged per developer per week',
+        'Number of code reviews participated in',
+        'Commit frequency distribution across team members',
+        'Relative velocity compared to organizational benchmarks'
       ],
       bestPractices: [
-        'Sử dụng CI/CD pipelines',
-        'Automated testing trước khi deploy',
-        'Feature flags để kiểm soát triển khai',
-        'Monitoring và alerting sau khi deploy'
-      ]
+        'Target 3-4 PRs per engineer per week (industry median)',
+        'Focus on right-sized PRs that balance review efficiency and context',
+        'Avoid using this metric in isolation or for individual performance reviews',
+        'Correlate with quality metrics to ensure speed isn\'t compromising reliability'
+      ],
+      benchmarks: {
+        median: '3-4 PRs per week',
+        top25Percent: '5+ PRs per week',
+        context: 'Varies by team type, organization size, and product complexity'
+      }
     },
     'Lead time': {
       name: 'Lead time',
-      description: 'Thời gian từ khi bắt đầu làm việc trên một tính năng đến khi nó được triển khai vào môi trường sản xuất.',
+      description: 'The time it takes for code to move from initial development to production. Measures the efficiency of the entire software delivery pipeline, from first commit to deployment.',
       examples: [
-        'Thời gian từ commit đầu tiên đến khi merge',
-        'Thời gian từ tạo PR đến khi được approve',
-        'Thời gian từ approve đến khi deploy'
+        'Time from first commit to production deployment',
+        'Time from PR creation to merge',
+        'Time from merge to deployment',
+        'End-to-end feature delivery timeline'
       ],
       bestPractices: [
-        'Chia nhỏ công việc thành các PR nhỏ',
-        'Tự động hóa quy trình review',
-        'Sử dụng templates cho PR',
-        'Thiết lập SLA cho review process'
+        'Break work into smaller, independently deployable units',
+        'Implement automated code review tools',
+        'Establish clear PR templates and guidelines',
+        'Set SLAs for review processes'
+      ],
+      benchmarks: {
+        elite: 'Less than 1 day',
+        high: '1-7 days',
+        medium: '1-4 weeks',
+        low: 'More than 1 month'
+      }
+    },
+    'Deployment frequency': {
+      name: 'Deployment frequency',
+      description: 'How often code is successfully deployed to production. Indicates the organization\'s ability to deliver changes quickly and reflects the overall agility of the engineering process.',
+      examples: [
+        'Number of deployments per day/week',
+        'Consistency of deployment cadence',
+        'Deployment batch size trends',
+        'Feature vs. hotfix deployment ratio'
+      ],
+      bestPractices: [
+        'Implement robust CI/CD pipelines',
+        'Emphasize small, frequent releases over large batches',
+        'Decouple deployments from releases using feature flags',
+        'Establish deployment windows that minimize business impact'
+      ],
+      benchmarks: {
+        elite: 'Multiple times per day',
+        high: 'Between once per day and once per week',
+        medium: 'Between once per week and once per month',
+        low: 'Less than once per month'
+      }
+    },
+    'Perceived rate of delivery': {
+      name: 'Perceived rate of delivery',
+      description: 'A self-reported metric capturing how developers perceive their ability to deliver code changes efficiently. Reveals potential disconnects between actual and perceived velocity.',
+      examples: [
+        'Survey responses on perceived delivery speed',
+        'Feedback on workflow bottlenecks',
+        'Comparison of perceived vs. actual delivery metrics',
+        'Stakeholder satisfaction with delivery pace'
+      ],
+      bestPractices: [
+        'Conduct regular developer surveys (pulse checks)',
+        'Address perception gaps with data visualization',
+        'Create feedback mechanisms for workflow improvement',
+        'Correlate with objective delivery metrics'
       ]
     },
-    // Add more metric details as needed
-  };
+    'Time to 10th PR': {
+      name: 'Time to 10th PR',
+      description: 'Measures how quickly a new engineer can become productive by tracking the time from joining to completing their 10th pull request. Indicates onboarding efficiency and codebase accessibility.',
+      examples: [
+        'Time to first PR for new hires',
+        'Progression of PR complexity for new team members',
+        'Onboarding milestone achievement rates',
+        'Comparison across teams or departments'
+      ],
+      bestPractices: [
+        'Create standardized onboarding processes with clear milestones',
+        'Provide well-documented starter tasks for new engineers',
+        'Implement mentorship programs for code review guidance',
+        'Maintain comprehensive documentation and architecture diagrams'
+      ],
+      benchmarks: {
+        target: 'First PR within 1-2 weeks, 10th PR within 6-8 weeks'
+      }
+    },
 
-  // Add drawer component
-  const MetricDrawer = ({ metric, onClose }: { metric: string; onClose: () => void }) => {
-    const details = metricDetails[metric];
-    if (!details) return null;
+    // EFFECTIVENESS DIMENSION METRICS
+    'Developer Experience Index (DXI)': {
+      name: 'Developer Experience Index (DXI)',
+      description: 'A composite metric measuring 14 dimensions of developer experience predictive of productivity, including deep work, iteration speed, confidence in making changes, technical debt, and more. Each one-point gain translates to approximately 13 minutes saved per developer per week.',
+      examples: [
+        'Survey-based assessment of developer workflow experience',
+        'Combined score across 14 experience dimensions',
+        'Team-level DXI compared to organizational average',
+        'Trend analysis of DXI over quarterly periods'
+      ],
+      bestPractices: [
+        'Use standardized surveys with consistent question framing',
+        'Measure regularly (quarterly) to track improvements',
+        'Analyze dimension-specific scores to identify focus areas',
+        'Balance improvements across all 14 dimensions for holistic gains'
+      ],
+      dimensions: [
+        'Deep work',
+        'Local iteration speed',
+        'Release process',
+        'Confidence in making changes',
+        'Technical debt',
+        'Architecture clarity',
+        'Tooling adequacy',
+        'Documentation',
+        'Onboarding',
+        'Team processes',
+        'Collaboration',
+        'Vision clarity',
+        'Requirements quality',
+        'Product management'
+      ],
+      benchmarks: {
+        median: '68-75 (varies by industry)',
+        target: '80+'
+      }
+    },
+    'Ease of delivery': {
+      name: 'Ease of delivery',
+      description: 'Measures how straightforward it is for developers to move code changes through the delivery pipeline to production. Assesses the friction in deployment processes and infrastructure.',
+      examples: [
+        'Self-reported satisfaction with deployment processes',
+        'Number of steps required for deployment',
+        'Frequency of deployment pipeline failures',
+        'Time spent debugging deployment issues'
+      ],
+      bestPractices: [
+        'Implement comprehensive CI/CD pipelines',
+        'Automate testing before deployment',
+        'Use feature flags to control releases',
+        'Establish monitoring and alerting for deployment health'
+      ]
+    },
+    'Regrettable attrition': {
+      name: 'Regrettable attrition',
+      description: 'The rate at which valued engineers leave the organization. Serves as a lagging indicator of developer experience issues and can signal problems with team culture or work environment.',
+      examples: [
+        'Percentage of high-performing engineers who leave voluntarily',
+        'Correlation between attrition and DXI scores',
+        'Exit interview insights categorized by theme',
+        'Tenure length trends over time'
+      ],
+      bestPractices: [
+        'Conduct thorough exit interviews to identify patterns',
+        'Track leading indicators of satisfaction before attrition occurs',
+        'Implement retention programs for key talent',
+        'Compare attrition rates to industry benchmarks'
+      ],
+      benchmarks: {
+        healthy: 'Less than 8% annual regrettable attrition',
+        concerning: '15%+ annual regrettable attrition'
+      }
+    },
 
-    return (
-      <div className="fixed inset-y-0 right-0 w-96 bg-white shadow-xl transform transition-transform duration-300 ease-in-out z-50 border-l border-gray-200">
-        <div className="h-full flex flex-col">
-          <div className="p-4 border-b flex justify-between items-center bg-blue-50">
-            <h2 className="text-xl font-bold text-blue-900">{details.name}</h2>
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-blue-100 rounded-full transition-colors duration-200"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-          <div className="flex-1 overflow-y-auto p-4">
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-blue-800 mb-2">Mô tả</h3>
-              <p className="text-gray-700">{details.description}</p>
-            </div>
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-blue-800 mb-2">Ví dụ</h3>
-              <ul className="list-disc pl-5 space-y-2">
-                {details.examples.map((example, index) => (
-                  <li key={index} className="text-gray-700">{example}</li>
-                ))}
-              </ul>
-            </div>
-            {details.bestPractices && (
-              <div>
-                <h3 className="text-lg font-semibold text-blue-800 mb-2">Best Practices</h3>
-                <ul className="list-disc pl-5 space-y-2">
-                  {details.bestPractices.map((practice, index) => (
-                    <li key={index} className="text-gray-700">{practice}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    );
+    // QUALITY DIMENSION METRICS
+    'Change failure rate': {
+      name: 'Change failure rate',
+      description: 'The percentage of changes (deployments or releases) that result in degraded service or require remediation (such as hotfixes or rollbacks). Primary metric for the Quality dimension.',
+      examples: [
+        'Percentage of deployments causing incidents',
+        'Hotfix frequency following releases',
+        'Rollback rate for deployments',
+        'Production bug introduction rate'
+      ],
+      bestPractices: [
+        'Implement rigorous pre-deployment testing',
+        'Use progressive deployment strategies (canary, blue-green)',
+        'Establish comprehensive monitoring and alerting',
+        'Conduct regular post-incident reviews'
+      ],
+      benchmarks: {
+        elite: 'Less than 0-15%',
+        high: '16-30%',
+        medium: '31-45%',
+        low: '46-60%+'
+      }
+    },
+    'Failed deployment recovery time': {
+      name: 'Failed deployment recovery time',
+      description: 'Measures how quickly teams can recover from deployment failures or service disruptions. Indicates the resilience of systems and effectiveness of incident response procedures.',
+      examples: [
+        'Mean time to recovery (MTTR) for production incidents',
+        'Time from identification to resolution',
+        'Time to rollback failed deployments',
+        'Incident response efficiency'
+      ],
+      bestPractices: [
+        'Implement automated rollback capabilities',
+        'Create detailed incident response playbooks',
+        'Establish on-call rotations with clear escalation paths',
+        'Conduct regular incident response drills'
+      ],
+      benchmarks: {
+        elite: 'Less than 1 hour',
+        high: 'Less than 1 day',
+        medium: 'Less than 1 week',
+        low: 'More than 1 week'
+      }
+    },
+    'Perceived software quality': {
+      name: 'Perceived software quality',
+      description: 'Self-reported assessment of the software\'s quality from the developer perspective. Captures insights about maintainability, technical debt, and codebase health that may not be visible in automated metrics.',
+      examples: [
+        'Developer satisfaction with codebase quality',
+        'Engineer confidence in system reliability',
+        'Perceptions of technical debt impact',
+        'Evaluation of code maintainability'
+      ],
+      bestPractices: [
+        'Conduct regular code quality surveys',
+        'Use standardized questions to track trends',
+        'Compare perceptions across teams and areas',
+        'Correlate with objective quality metrics'
+      ]
+    },
+    'Operational health metrics': {
+      name: 'Operational health metrics',
+      description: 'Collection of metrics that indicate the operational stability and performance of software systems in production. Provides objective data on actual system behavior.',
+      examples: [
+        'System availability percentage',
+        'Error rates and distribution',
+        'Performance metrics (latency, throughput)',
+        'Resource utilization efficiency'
+      ],
+      bestPractices: [
+        'Establish comprehensive monitoring dashboards',
+        'Define and track service level objectives (SLOs)',
+        'Implement proactive alerting thresholds',
+        'Create operational health scorecards'
+      ],
+      benchmarks: {
+        target: '99.9% availability or higher for critical systems'
+      }
+    },
+    'Security metrics': {
+      name: 'Security metrics',
+      description: 'Measures the security posture of software and development processes. Encompasses vulnerability management, security testing, and compliance adherence.',
+      examples: [
+        'Vulnerability density per 1,000 lines of code',
+        'Time to remediate security issues',
+        'Security testing coverage',
+        'Compliance audit pass rate'
+      ],
+      bestPractices: [
+        'Integrate security scanning into CI/CD pipeline',
+        'Establish vulnerability severity classification',
+        'Implement regular security training',
+        'Conduct periodic penetration testing'
+      ]
+    },
+
+    // IMPACT DIMENSION METRICS
+    'Percentage of time spent on new capabilities': {
+      name: 'Percentage of time spent on new capabilities',
+      description: 'The proportion of engineering effort dedicated to developing new features versus maintenance, technical debt, and non-feature work. Primary metric for the Impact dimension.',
+      examples: [
+        'Percentage breakdown of engineering time allocation',
+        'Feature vs. non-feature work ratio',
+        'Time investment in technical debt reduction',
+        'Maintenance effort trend analysis'
+      ],
+      bestPractices: [
+        'Target 60-70% time on new capabilities (industry benchmark)',
+        'Create explicit policies for technical debt allocation',
+        'Track feature impact to justify investment',
+        'Periodically reassess allocation based on business needs'
+      ],
+      benchmarks: {
+        median: '56-68% on feature work',
+        target: 'Balance based on product lifecycle stage'
+      }
+    },
+    'Initiative progress and ROI': {
+      name: 'Initiative progress and ROI',
+      description: 'Tracks the advancement and return on investment of key engineering initiatives. Links technical efforts to business outcomes and value creation.',
+      examples: [
+        'Progress against initiative milestones',
+        'Business value delivered per initiative',
+        'ROI calculation for major engineering investments',
+        'Feature adoption and usage metrics'
+      ],
+      bestPractices: [
+        'Define clear success metrics for initiatives',
+        'Establish methodology for calculating engineering ROI',
+        'Create dashboards for initiative tracking',
+        'Conduct regular initiative retrospectives'
+      ]
+    },
+    'Revenue per engineer': {
+      name: 'Revenue per engineer',
+      description: 'A high-level efficiency metric that divides company revenue by the number of engineers. Provides a broad measure of engineering productivity from a business perspective.',
+      examples: [
+        'Annual revenue generated per engineering headcount',
+        'Trend analysis of revenue efficiency over time',
+        'Comparison to industry benchmarks',
+        'Revenue efficiency by product area'
+      ],
+      bestPractices: [
+        'Use as a trend indicator rather than absolute measure',
+        'Compare against industry and company-stage peers',
+        'Factor in product maturity and market conditions',
+        'Consider alongside other efficiency metrics'
+      ],
+      benchmarks: {
+        varies: 'Highly dependent on industry, company stage, and business model'
+      }
+    },
+    'R&D as percentage of revenue': {
+      name: 'R&D as percentage of revenue',
+      description: 'The proportion of company revenue invested in research and development. Indicates prioritization of innovation and technical investment.',
+      examples: [
+        'Engineering budget as percentage of revenue',
+        'R&D investment compared to industry averages',
+        'R&D efficiency (output per dollar invested)',
+        'Investment allocation across product areas'
+      ],
+      bestPractices: [
+        'Benchmark against industry standards',
+        'Adjust based on company growth stage',
+        'Balance with profitability targets',
+        'Analyze R&D ROI to optimize allocation'
+      ],
+      benchmarks: {
+        software: '15-25% of revenue for established software companies',
+        startups: 'Often higher, can exceed 50% in early stages'
+      }
+    }
   };
 
   // Handle card click to toggle expanded view
@@ -488,9 +769,31 @@ export default function DXCoreFramework() {
     return '';
   };
 
-  // Update metric click handlers
-  const handleMetricClick = (metric: string) => {
-    setSelectedMetric(metric);
+  const handleMetricClick = (metric: string, event: React.MouseEvent) => {
+    event.stopPropagation();
+
+    if (selectedMetric === metric) {
+      setSelectedMetric(null);
+      setPopupPosition(null);
+    } else {
+      // Get the target element's dimensions and position
+      const targetElement = event.currentTarget as HTMLElement;
+      const targetRect = targetElement.getBoundingClientRect();
+
+      // Critical fix: Use absolute coordinates
+      // This positions the popup at an absolute position on the page,
+      // regardless of any scrolling that has occurred
+      const absolutePosition = {
+        // Position at the bottom of the clicked element
+        top: targetRect.bottom + window.scrollY,
+        // Position at the left edge of the clicked element
+        left: targetRect.left + window.scrollX
+      };
+
+      // Update the metric and position states
+      setSelectedMetric(metric);
+      setPopupPosition(absolutePosition);
+    }
   };
 
   return (
@@ -501,6 +804,12 @@ export default function DXCoreFramework() {
 
       {/* Tabs */}
       <div className="flex justify-center mb-6">
+        <button
+          className={`px-4 py-2 mr-2 rounded-md ${activeTab === 'why' ? 'bg-blue-700 text-white' : 'bg-gray-200'}`}
+          onClick={() => setActiveTab('why')}
+        >
+          Why Core DX
+        </button>
         <button
           className={`px-4 py-2 mr-2 rounded-md ${activeTab === 'roles' ? 'bg-blue-700 text-white' : 'bg-gray-200'}`}
           onClick={() => setActiveTab('roles')}
@@ -521,8 +830,116 @@ export default function DXCoreFramework() {
         </button>
       </div>
 
+      {/* Why Core DX Content */}
+      {activeTab === 'why' && (
+        <div className="space-y-6">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold text-blue-900 mb-3">Why Developer Experience (DX) Matters</h2>
+            <p className="text-gray-600 max-w-3xl mx-auto">
+              Developer Experience is a strategic imperative that directly impacts business outcomes through enhanced productivity, quality, and retention.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-6">
+            {/* Business Impact */}
+            <div className="bg-white rounded-lg shadow-md p-6 border-t-4 border-blue-500">
+              <h3 className="text-xl font-bold text-blue-900 mb-4">Business Impact</h3>
+              <ul className="space-y-3">
+                <li className="flex items-start">
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mr-3 mt-1">✓</span>
+                  <span>13 minutes saved per developer per week for each DXI point improvement</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mr-3 mt-1">✓</span>
+                  <span>20-40% increase in development velocity with optimized DX</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mr-3 mt-1">✓</span>
+                  <span>Reduced time-to-market for new features and products</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Engineering Excellence */}
+            <div className="bg-white rounded-lg shadow-md p-6 border-t-4 border-green-500">
+              <h3 className="text-xl font-bold text-green-900 mb-4">Engineering Excellence</h3>
+              <ul className="space-y-3">
+                <li className="flex items-start">
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-green-100 text-green-600 flex items-center justify-center mr-3 mt-1">✓</span>
+                  <span>Higher code quality and reduced technical debt</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-green-100 text-green-600 flex items-center justify-center mr-3 mt-1">✓</span>
+                  <span>Improved system reliability and maintainability</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-green-100 text-green-600 flex items-center justify-center mr-3 mt-1">✓</span>
+                  <span>Faster onboarding and knowledge transfer</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Team Success */}
+            <div className="bg-white rounded-lg shadow-md p-6 border-t-4 border-purple-500">
+              <h3 className="text-xl font-bold text-purple-900 mb-4">Team Success</h3>
+              <ul className="space-y-3">
+                <li className="flex items-start">
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center mr-3 mt-1">✓</span>
+                  <span>Increased developer satisfaction and retention</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center mr-3 mt-1">✓</span>
+                  <span>Enhanced collaboration and knowledge sharing</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center mr-3 mt-1">✓</span>
+                  <span>Reduced burnout and improved work-life balance</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Innovation & Growth */}
+            <div className="bg-white rounded-lg shadow-md p-6 border-t-4 border-orange-500">
+              <h3 className="text-xl font-bold text-orange-900 mb-4">Innovation & Growth</h3>
+              <ul className="space-y-3">
+                <li className="flex items-start">
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center mr-3 mt-1">✓</span>
+                  <span>More time for innovation and experimentation</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center mr-3 mt-1">✓</span>
+                  <span>Improved ability to adopt new technologies</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center mr-3 mt-1">✓</span>
+                  <span>Accelerated organizational learning and adaptation</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="bg-blue-50 rounded-lg p-6 mt-6">
+            <h3 className="text-xl font-bold text-blue-900 mb-4">Key Insights</h3>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="bg-white rounded p-4 shadow-sm">
+                <div className="text-2xl font-bold text-blue-600 mb-2">42%</div>
+                <p className="text-sm text-gray-600">Average productivity gain from high DX investment</p>
+              </div>
+              <div className="bg-white rounded p-4 shadow-sm">
+                <div className="text-2xl font-bold text-blue-600 mb-2">23%</div>
+                <p className="text-sm text-gray-600">Reduction in development cycle time</p>
+              </div>
+              <div className="bg-white rounded p-4 shadow-sm">
+                <div className="text-2xl font-bold text-blue-600 mb-2">38%</div>
+                <p className="text-sm text-gray-600">Improvement in employee retention</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Core 4 Dimension Filters */}
-      {activeTab !== 'core4' && (
+      {activeTab !== 'core4' && activeTab !== 'why' && (
         <div className="mb-6">
           <h3 className="text-sm font-semibold mb-2 text-gray-600">Filter by Core 4 Dimension:</h3>
           <div className="flex flex-wrap gap-2">
@@ -570,17 +987,17 @@ export default function DXCoreFramework() {
             {/* Row for each stakeholder */}
             {stakeholders.map(stakeholder => (
               <React.Fragment key={stakeholder.id}>
-                {/* Stakeholder label */}
-                <div className="bg-blue-700 text-white p-2 rounded-md flex items-center font-semibold">
-                  {stakeholder.title}
-                  <div className="ml-2 flex gap-1">
+                {/* Stakeholder label - MODIFIED THIS SECTION */}
+                <div className="bg-blue-700 text-white p-2 rounded-md flex flex-col">
+                  <div className="font-semibold">{stakeholder.title}</div>
+                  <div className="flex gap-1 mt-1">
                     {stakeholder.primaryDimensions?.map(dim => (
                       <span
                         key={dim}
                         className={`${getDimensionColor(dim)} text-xs px-1.5 py-0.5 rounded-full border text-xs`}
                         style={{ fontSize: '0.65rem' }}
                       >
-                        {dim.charAt(0).toUpperCase()}
+                        {dim.charAt(0).toUpperCase() + dim.slice(1, 3)}
                       </span>
                     ))}
                   </div>
@@ -622,7 +1039,11 @@ export default function DXCoreFramework() {
                           <div
                             key={`expanded-${activity.id}`}
                             ref={expandedCardRef}
-                            className="absolute z-50 bg-white border border-gray-300 shadow-lg rounded-md p-3 w-80 text-sm top-full left-0 mt-1"
+                            className="absolute z-50 bg-white border border-gray-300 shadow-lg rounded-md p-3 w-80 text-sm"
+                            style={{
+                              top: 'calc(100% + 4px)',
+                              left: '0'
+                            }}
                             onClick={(e) => e.stopPropagation()}
                           >
                             <h3 className="font-bold mb-2 text-blue-900">{activity.description}</h3>
@@ -637,11 +1058,8 @@ export default function DXCoreFramework() {
                                   return (
                                     <div
                                       key={idx}
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleMetricClick(metric);
-                                      }}
-                                      className={`flex items-center p-1 rounded ${dimensionColor} border cursor-pointer hover:opacity-80 transition-opacity duration-200`}
+
+                                      className={`flex relative items-center p-1 rounded ${dimensionColor} border hover:opacity-80 transition-opacity duration-200`}
                                     >
                                       <span className="text-sm font-medium">{metric}</span>
                                     </div>
@@ -660,6 +1078,24 @@ export default function DXCoreFramework() {
                 })}
               </React.Fragment>
             ))}
+          </div>
+
+          {/* Legend section - moved inside roles tab */}
+          <div className="mt-4 p-4 bg-gray-100 rounded-md">
+            <h2 className="text-lg font-semibold text-blue-900 mb-3">Legend - Stakeholder Roles</h2>
+            <div className="grid grid-cols-2 gap-4">
+              {stakeholders.map(stakeholder => (
+                <div key={stakeholder.id} className="flex items-center">
+                  <div className={`w-4 h-4 flex-shrink-0 ${stakeholder.color} border rounded-sm mr-2`}></div>
+                  <span>{stakeholder.title} - {stakeholder.id === 's1' ? 'Strategic direction' :
+                    stakeholder.id === 's2' ? 'Team coordination' :
+                      stakeholder.id === 's3' ? 'Technical implementation' :
+                        stakeholder.id === 's4' ? 'Product management' :
+                          'Implementation and feedback'}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
         </>
       )}
@@ -694,7 +1130,7 @@ export default function DXCoreFramework() {
                           }`}></div>
                         <span
                           className="text-sm cursor-pointer hover:opacity-80 transition-opacity duration-200"
-                          onClick={() => handleMetricClick(metric)}
+                          onClick={(e) => handleMetricClick(metric, e)}
                         >{metric}</span>
                       </div>
                     );
@@ -769,7 +1205,7 @@ export default function DXCoreFramework() {
                   <div className="mb-4">
                     <h4 className="font-semibold text-gray-700 mb-2">Key Metric:</h4>
                     <div
-                      onClick={() => handleMetricClick(dimension.keyMetric)}
+                      onClick={(e) => handleMetricClick(dimension.keyMetric, e)}
                       className={`inline-block px-3 py-1 rounded-full font-medium cursor-pointer hover:opacity-80 ${dimension.id === 'speed' ? 'bg-green-100 text-green-800' :
                         dimension.id === 'effectiveness' ? 'bg-blue-100 text-blue-800' :
                           dimension.id === 'quality' ? 'bg-purple-100 text-purple-800' :
@@ -784,7 +1220,7 @@ export default function DXCoreFramework() {
                       {dimension.secondaryMetrics.map(metric => (
                         <span
                           key={metric}
-                          onClick={() => handleMetricClick(metric)}
+                          onClick={(e) => handleMetricClick(metric, e)}
                           className={`px-2 py-1 text-sm rounded cursor-pointer hover:opacity-80 ${dimension.id === 'speed' ? 'bg-green-50 text-green-700' :
                             dimension.id === 'effectiveness' ? 'bg-blue-50 text-blue-700' :
                               dimension.id === 'quality' ? 'bg-purple-50 text-purple-700' :
@@ -863,30 +1299,46 @@ export default function DXCoreFramework() {
         </div>
       )}
 
-      {/* Add drawer */}
-      {selectedMetric && (
-        <MetricDrawer
-          metric={selectedMetric}
-          onClose={() => setSelectedMetric(null)}
-        />
-      )}
-
-      <div className="mt-4 p-4 bg-gray-100 rounded-md">
-        <h2 className="text-lg font-semibold text-blue-900 mb-3">Legend - Stakeholder Roles</h2>
-        <div className="grid grid-cols-2 gap-4">
-          {stakeholders.map(stakeholder => (
-            <div key={stakeholder.id} className="flex items-center">
-              <div className={`w-4 h-4 flex-shrink-0 ${stakeholder.color} border rounded-sm mr-2`}></div>
-              <span>{stakeholder.title} - {stakeholder.id === 's1' ? 'Strategic direction' :
-                stakeholder.id === 's2' ? 'Team coordination' :
-                  stakeholder.id === 's3' ? 'Technical implementation' :
-                    stakeholder.id === 's4' ? 'Product management' :
-                      'Implementation and feedback'}
-              </span>
+      {/* Add metric popup */}
+      {selectedMetric && metricDetails[selectedMetric] && popupPosition && (
+        <div
+          ref={expandedCardRef}
+          className="absolute z-50 bg-white border border-gray-300 shadow-lg rounded-md p-3 w-80 text-sm"
+          style={{
+            top: `${popupPosition.top}px`,
+            left: `${popupPosition.left}px`
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <h3 className="font-bold mb-2 text-blue-900">{metricDetails[selectedMetric].name}</h3>
+          <p className="mb-3">{metricDetails[selectedMetric].description}</p>
+          <div className="border-t pt-2">
+            <h4 className="font-semibold text-blue-800 mb-2">Examples:</h4>
+            <ul className="list-disc pl-4 space-y-1">
+              {metricDetails[selectedMetric].examples.map((example, index) => (
+                <li key={index} className="text-gray-700">{example}</li>
+              ))}
+            </ul>
+          </div>
+          {metricDetails[selectedMetric].bestPractices && (
+            <div className="border-t mt-2 pt-2">
+              <h4 className="font-semibold text-blue-800 mb-2">Best Practices:</h4>
+              <ul className="list-disc pl-4 space-y-1">
+                {metricDetails[selectedMetric].bestPractices?.map((practice, index) => (
+                  <li key={index} className="text-gray-700">{practice}</li>
+                ))}
+              </ul>
             </div>
-          ))}
+          )}
+          <div className="mt-2 text-xs text-gray-500">
+            {getMetricDimension(selectedMetric) && (
+              <span className={`${getDimensionColor(getMetricDimension(selectedMetric))} px-2 py-0.5 rounded-full text-xs`}>
+                {dxCore4Dimensions.find(d => d.id === getMetricDimension(selectedMetric))?.title}
+              </span>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="mt-6 text-center text-sm text-gray-500">
         <p>Click on any activity card to view detailed information and related metrics. Switch tabs to see metrics dashboard and Core 4 dimensions.</p>
