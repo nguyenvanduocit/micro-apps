@@ -13,6 +13,30 @@ const artifacts: Artifact[] = [
     title: 'DX Core 4 Implementation Phases',
     description: 'A framework for implementing and measuring developer experience using the Core 4 dimensions: Speed, Effectiveness, Quality, and Impact.',
     path: '/core4-implement-phases'
+  },
+  {
+    id: 'dashboard',
+    title: 'DX Core 4 Dashboard',
+    description: 'Interactive dashboard visualizing Core 4 metrics, insights, and ROI analysis to measure and improve developer experience.',
+    path: '/dashboard'
+  },
+  {
+    id: 'case-studies',
+    title: 'Case Studies Library',
+    description: 'Explore detailed case studies from organizations that have successfully implemented the DX Core 4 framework with measurable outcomes.',
+    path: '/case-studies'
+  },
+  {
+    id: 'interactive-tutorial',
+    title: 'Interactive Framework Tutorial',
+    description: 'Step-by-step interactive guide to understanding and implementing the DX Core 4 framework in your organization with practical exercises.',
+    path: '/interactive-tutorial'
+  },
+  {
+    id: 'advanced-visualizations',
+    title: 'Advanced Metrics Visualizations',
+    description: 'Customizable visualization tools for deeper insights into your DX metrics across different timeframes, teams, and organizational contexts.',
+    path: '/advanced-visualizations'
   }
   // Add more artifacts here as they become available
 ];

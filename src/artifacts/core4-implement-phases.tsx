@@ -64,54 +64,61 @@ export default function DXCoreFramework() {
     {
       id: 'speed',
       title: 'Speed',
-      description: 'Measures the velocity and efficiency of the software delivery process',
+      description: 'Measures how quickly developers can deliver production-ready code',
       keyMetric: 'Diffs per engineer',
       secondaryMetrics: [
         'Lead time',
         'Deployment frequency',
-        'Perceived rate of delivery',
-        'Time to 10th PR'
+        'Perceived delivery rate',
+        'Time to 10th PR',
+        'PR size'
       ]
     },
     {
       id: 'effectiveness',
       title: 'Effectiveness',
-      description: 'Evaluates the degree to which engineers can work efficiently and with minimal friction',
+      description: 'Evaluates how well teams navigate development processes and workflows',
       keyMetric: 'Developer Experience Index (DXI)',
       secondaryMetrics: [
         'Ease of delivery',
-        'Regrettable attrition'
+        'Regrettable attrition',
+        'Meeting time',
+        'Build time',
+        'Workflow friction points'
       ]
     },
     {
       id: 'quality',
       title: 'Quality',
-      description: 'Assesses the reliability, stability, and maintainability of the software being delivered',
-      keyMetric: 'Change failure rate',
+      description: 'Assesses the stability and reliability of software in production',
+      keyMetric: 'Quality score',
       secondaryMetrics: [
+        'Change failure rate',
         'Failed deployment recovery time',
         'Perceived software quality',
-        'Operational health metrics',
+        'Operational health',
         'Security metrics'
       ]
     },
     {
       id: 'impact',
       title: 'Impact',
-      description: 'Measures the business value and outcomes delivered by engineering efforts',
+      description: 'Measures how much developers contribute to business value beyond writing code',
       keyMetric: 'Percentage of time spent on new capabilities',
       secondaryMetrics: [
-        'Initiative progress and ROI',
+        'Feature time ratio',
+        'Initiative ROI',
         'Revenue per engineer',
-        'R&D as percentage of revenue'
+        'R&D revenue ratio',
+        'Business value delivery'
       ]
     }
   ];
 
   // Framework data structure
   const phases = [
-    { id: 'p1', title: 'Phase 1: Metric Definition and Tooling Setup' },
-    { id: 'p2', title: 'Phase 2: Baseline Measurement' },
+    { id: 'p1', title: 'Phase 1: Metric Definition and Tooling Setup (4 weeks)' },
+    { id: 'p2', title: 'Phase 2: Baseline Measurement (4 weeks)' },
     { id: 'p3', title: 'Phase 3: Targeted Improvement Initiatives' },
     { id: 'p4', title: 'Phase 4: Continuous Optimization' }
   ];
@@ -834,105 +841,115 @@ export default function DXCoreFramework() {
       {activeTab === 'why' && (
         <div className="space-y-6">
           <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-blue-900 mb-3">Why Developer Experience (DX) Matters</h2>
+            <h2 className="text-2xl font-bold text-blue-900 mb-3">Why DX Core 4 Framework?</h2>
             <p className="text-gray-600 max-w-3xl mx-auto">
-              Developer Experience is a strategic imperative that directly impacts business outcomes through enhanced productivity, quality, and retention.
+              The DX Core 4 framework provides a structured, comprehensive approach to measuring and improving developer experience through four essential dimensions: Speed, Effectiveness, Quality, and Impact. Developed by Laura Tacho (DX CTO) and Abi Noda (DX Co-founder) in collaboration with authors of previous frameworks, DX Core 4 unifies DORA, SPACE, and DevEx methodologies into a balanced scorecard for engineering performance.
+            </p>
+            <p className="text-blue-600 mt-3 font-medium text-sm">
+              "Speed is great, but if you're going faster while being less effective, that's not great. Business impact is great, but if you're having a lot of business impact but your quality is going down, that's not great either." - Laura Tacho
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-6">
-            {/* Business Impact */}
+            {/* Framework Necessity */}
             <div className="bg-white rounded-lg shadow-md p-6 border-t-4 border-blue-500">
-              <h3 className="text-xl font-bold text-blue-900 mb-4">Business Impact</h3>
+              <h3 className="text-xl font-bold text-blue-900 mb-4">Why a Framework?</h3>
               <ul className="space-y-3">
                 <li className="flex items-start">
                   <span className="flex-shrink-0 w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mr-3 mt-1">✓</span>
-                  <span>13 minutes saved per developer per week for each DXI point improvement</span>
+                  <span>Unstructured DX improvements often lead to unbalanced optimization and missed opportunities</span>
                 </li>
                 <li className="flex items-start">
                   <span className="flex-shrink-0 w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mr-3 mt-1">✓</span>
-                  <span>20-40% increase in development velocity with optimized DX</span>
+                  <span>Core 4 provides clear metrics and benchmarks for measuring progress</span>
                 </li>
                 <li className="flex items-start">
                   <span className="flex-shrink-0 w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mr-3 mt-1">✓</span>
-                  <span>Reduced time-to-market for new features and products</span>
+                  <span>Enables systematic improvement across all critical engineering dimensions</span>
                 </li>
               </ul>
             </div>
 
-            {/* Engineering Excellence */}
+            {/* Balanced Approach */}
             <div className="bg-white rounded-lg shadow-md p-6 border-t-4 border-green-500">
-              <h3 className="text-xl font-bold text-green-900 mb-4">Engineering Excellence</h3>
+              <h3 className="text-xl font-bold text-green-900 mb-4">Why These 4 Dimensions?</h3>
               <ul className="space-y-3">
                 <li className="flex items-start">
-                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-green-100 text-green-600 flex items-center justify-center mr-3 mt-1">✓</span>
-                  <span>Higher code quality and reduced technical debt</span>
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-green-100 text-green-600 flex items-center justify-center mr-3 mt-1">↗</span>
+                  <span>Speed measures velocity without sacrificing other aspects</span>
                 </li>
                 <li className="flex items-start">
-                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-green-100 text-green-600 flex items-center justify-center mr-3 mt-1">✓</span>
-                  <span>Improved system reliability and maintainability</span>
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-green-100 text-green-600 flex items-center justify-center mr-3 mt-1">↗</span>
+                  <span>Effectiveness ensures sustainable productivity improvements</span>
                 </li>
                 <li className="flex items-start">
-                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-green-100 text-green-600 flex items-center justify-center mr-3 mt-1">✓</span>
-                  <span>Faster onboarding and knowledge transfer</span>
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-green-100 text-green-600 flex items-center justify-center mr-3 mt-1">↗</span>
+                  <span>Quality maintains high standards while improving speed</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-green-100 text-green-600 flex items-center justify-center mr-3 mt-1">↗</span>
+                  <span>Impact ensures improvements translate to business value</span>
                 </li>
               </ul>
             </div>
 
-            {/* Team Success */}
+            {/* Implementation Benefits */}
             <div className="bg-white rounded-lg shadow-md p-6 border-t-4 border-purple-500">
-              <h3 className="text-xl font-bold text-purple-900 mb-4">Team Success</h3>
+              <h3 className="text-xl font-bold text-purple-900 mb-4">Framework Benefits</h3>
               <ul className="space-y-3">
                 <li className="flex items-start">
-                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center mr-3 mt-1">✓</span>
-                  <span>Increased developer satisfaction and retention</span>
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center mr-3 mt-1">★</span>
+                  <span>Clear role definitions and responsibilities across stakeholders</span>
                 </li>
                 <li className="flex items-start">
-                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center mr-3 mt-1">✓</span>
-                  <span>Enhanced collaboration and knowledge sharing</span>
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center mr-3 mt-1">★</span>
+                  <span>Phased implementation approach for systematic improvement</span>
                 </li>
                 <li className="flex items-start">
-                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center mr-3 mt-1">✓</span>
-                  <span>Reduced burnout and improved work-life balance</span>
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center mr-3 mt-1">★</span>
+                  <span>Balanced scorecard approach preventing local optimizations</span>
                 </li>
               </ul>
             </div>
 
-            {/* Innovation & Growth */}
-            <div className="bg-white rounded-lg shadow-md p-6 border-t-4 border-orange-500">
-              <h3 className="text-xl font-bold text-orange-900 mb-4">Innovation & Growth</h3>
+            {/* Without Framework Risks */}
+            <div className="bg-white rounded-lg shadow-md p-6 border-t-4 border-red-500">
+              <h3 className="text-xl font-bold text-red-900 mb-4">Risks Without Core 4</h3>
               <ul className="space-y-3">
                 <li className="flex items-start">
-                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center mr-3 mt-1">✓</span>
-                  <span>More time for innovation and experimentation</span>
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-red-100 text-red-600 flex items-center justify-center mr-3 mt-1">!</span>
+                  <span>Unbalanced focus leading to bottlenecks in neglected areas</span>
                 </li>
                 <li className="flex items-start">
-                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center mr-3 mt-1">✓</span>
-                  <span>Improved ability to adopt new technologies</span>
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-red-100 text-red-600 flex items-center justify-center mr-3 mt-1">!</span>
+                  <span>Lack of clear metrics for measuring improvement success</span>
                 </li>
                 <li className="flex items-start">
-                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center mr-3 mt-1">✓</span>
-                  <span>Accelerated organizational learning and adaptation</span>
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-red-100 text-red-600 flex items-center justify-center mr-3 mt-1">!</span>
+                  <span>Difficulty in aligning stakeholders without structured approach</span>
                 </li>
               </ul>
             </div>
           </div>
 
           <div className="bg-blue-50 rounded-lg p-6 mt-6">
-            <h3 className="text-xl font-bold text-blue-900 mb-4">Key Insights</h3>
+            <h3 className="text-xl font-bold text-blue-900 mb-4">Business Outcomes</h3>
             <div className="grid grid-cols-3 gap-4">
               <div className="bg-white rounded p-4 shadow-sm">
-                <div className="text-2xl font-bold text-blue-600 mb-2">42%</div>
-                <p className="text-sm text-gray-600">Average productivity gain from high DX investment</p>
+                <div className="text-2xl font-bold text-blue-600 mb-2">3-12%</div>
+                <p className="text-sm text-gray-600">Overall increase in engineering efficiency</p>
               </div>
               <div className="bg-white rounded p-4 shadow-sm">
-                <div className="text-2xl font-bold text-blue-600 mb-2">23%</div>
-                <p className="text-sm text-gray-600">Reduction in development cycle time</p>
+                <div className="text-2xl font-bold text-blue-600 mb-2">14%</div>
+                <p className="text-sm text-gray-600">Increase in R&D time spent on feature development</p>
               </div>
               <div className="bg-white rounded p-4 shadow-sm">
-                <div className="text-2xl font-bold text-blue-600 mb-2">38%</div>
-                <p className="text-sm text-gray-600">Improvement in employee retention</p>
+                <div className="text-2xl font-bold text-blue-600 mb-2">15%</div>
+                <p className="text-sm text-gray-600">Improvement in employee engagement scores</p>
               </div>
+            </div>
+            <div className="mt-4 text-sm text-gray-700 italic">
+              *Based on data from 300+ organizations that have implemented the DX Core 4 framework
             </div>
           </div>
         </div>
@@ -1272,28 +1289,37 @@ export default function DXCoreFramework() {
             <div className="grid grid-cols-2 gap-3">
               <div className="bg-blue-50 p-3 rounded-md">
                 <ul className="list-disc pl-5 text-blue-800">
-                  <li>Deep work</li>
+                  <li>Deep work capabilities</li>
                   <li>Local iteration speed</li>
-                  <li>Release process</li>
+                  <li>Release process efficiency</li>
                   <li>Confidence in making changes</li>
-                  <li>Technical debt</li>
+                  <li>Technical debt management</li>
                   <li>Architecture clarity</li>
                   <li>Tooling adequacy</li>
                 </ul>
               </div>
               <div className="bg-blue-50 p-3 rounded-md">
                 <ul className="list-disc pl-5 text-blue-800">
-                  <li>Documentation</li>
-                  <li>Onboarding</li>
-                  <li>Team processes</li>
-                  <li>Collaboration</li>
+                  <li>Documentation quality</li>
+                  <li>Onboarding experience</li>
+                  <li>Team processes effectiveness</li>
+                  <li>Collaboration quality</li>
                   <li>Vision clarity</li>
                   <li>Requirements quality</li>
-                  <li>Product management</li>
+                  <li>Product management satisfaction</li>
                 </ul>
               </div>
             </div>
             <p className="mt-4 text-sm text-gray-700">Each one-point gain in the DXI score translates to saving approximately 13 minutes per developer per week (10 hours annually).</p>
+            <div className="mt-4 bg-yellow-50 p-3 rounded-md border border-yellow-200">
+              <h4 className="font-semibold text-yellow-800">Implementation Best Practices:</h4>
+              <ul className="list-disc pl-5 text-yellow-800 mt-2 text-sm">
+                <li>Avoid using metrics for individual evaluation - measure team and organizational performance only</li>
+                <li>Balance all four dimensions; don't overoptimize one at the expense of others</li>
+                <li>Use metrics for continuous improvement rather than as targets or KPIs</li>
+                <li>Remember Goodhart's Law: "Every measure which becomes a target becomes a bad measure"</li>
+              </ul>
+            </div>
           </div>
 
         </div>
