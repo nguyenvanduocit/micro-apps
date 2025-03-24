@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, AreaChart, Area, ScatterChart, Scatter, ZAxis, Cell } from 'recharts';
 
 // Formula Definitions for DX Core 4 Primary Metrics
@@ -378,6 +378,17 @@ const getMetricDescription = (dimension) => {
   return descriptions[dimension] || "";
 };
 
+// Helper function to get dimension color class
+const getDimensionColor = (dimension) => {
+  switch (dimension) {
+    case 'speed': return 'bg-green-100 border-green-400 text-green-800';
+    case 'effectiveness': return 'bg-blue-100 border-blue-400 text-blue-800';
+    case 'quality': return 'bg-purple-100 border-purple-400 text-purple-800';
+    case 'impact': return 'bg-orange-100 border-orange-400 text-orange-800';
+    default: return 'bg-gray-100 border-gray-400 text-gray-800';
+  }
+};
+
 const getSecondaryMetricLabel = (dimension, metric) => {
   const labels = {
     speed: {
@@ -710,10 +721,27 @@ const PrimaryMetricCard = ({ title, value, benchmark, industryAvg, industryHigh,
 // Component for secondary metric item with formula tooltip
 const SecondaryMetricItem = ({ label, value, benchmark, unit, invert = false, dimension, metric }) => {
   const [showFormula, setShowFormula] = useState(false);
+  const [popupPosition, setPopupPosition] = useState(null);
+  const formulaRef = useRef(null);
   const percentDiff = ((value - benchmark) / benchmark * 100).toFixed(1);
   const isPositive = invert ? value < benchmark : value > benchmark;
 
   const calculation = secondaryMetricCalculations[dimension]?.[metric];
+  
+  // Handle clicks outside the formula popover
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (formulaRef.current && !formulaRef.current.contains(event.target)) {
+        setShowFormula(false);
+        setPopupPosition(null);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   return (
     <div className="flex flex-col py-3 border-b border-gray-100 hover:bg-gray-50">
@@ -722,7 +750,28 @@ const SecondaryMetricItem = ({ label, value, benchmark, unit, invert = false, di
           {label}
           {calculation && (
             <button
-              onClick={(e) => { e.stopPropagation(); setShowFormula(!showFormula); }}
+              onClick={(e) => { 
+                e.stopPropagation();
+                if (showFormula) {
+                  setShowFormula(false);
+                  setPopupPosition(null);
+                } else {
+                  // Get the target element's dimensions and position
+                  const targetElement = e.currentTarget;
+                  const targetRect = targetElement.getBoundingClientRect();
+                  
+                  // Position the popup at an absolute position on the page
+                  const absolutePosition = {
+                    // Position at the bottom of the clicked element
+                    top: targetRect.bottom + window.scrollY,
+                    // Position at the left edge of the clicked element
+                    left: targetRect.left + window.scrollX
+                  };
+                  
+                  setShowFormula(true);
+                  setPopupPosition(absolutePosition);
+                }
+              }}
               className="ml-1 text-blue-500 hover:text-blue-700"
               aria-label="Show formula details"
               title="Click to see metric details"
@@ -741,38 +790,57 @@ const SecondaryMetricItem = ({ label, value, benchmark, unit, invert = false, di
         </div>
       </div>
 
-      {showFormula && calculation && (
-        <div className="mt-2 mb-1 p-3 bg-gray-50 rounded-md border border-gray-200 text-sm">
-          <div className="font-medium text-gray-800 mb-1">Formula: {calculation.formula}</div>
-          <div className="text-gray-700 mb-1">
-            <span className="font-medium">Target range:</span> {calculation.targetRange[0]}{unit} - {calculation.targetRange[1]}{unit}
+      {showFormula && calculation && popupPosition && (
+        <div 
+          ref={formulaRef}
+          className="absolute z-50 bg-white border border-gray-300 shadow-lg rounded-md p-3 w-80 text-sm"
+          style={{
+            top: `${popupPosition.top}px`,
+            left: `${popupPosition.left}px`
+          }}
+        >
+          <h3 className="font-bold mb-2 text-blue-900">{label}</h3>
+          <p className="mb-3 text-gray-600">{calculation.formula}</p>
+          
+          <div className="border-t pt-2">
+            <h4 className="font-semibold text-blue-800 mb-2">Target Range:</h4>
+            <p className="text-gray-700">{calculation.targetRange[0]}{unit} - {calculation.targetRange[1]}{unit}</p>
           </div>
-          <div className="text-gray-700 flex items-center">
-            <span className="font-medium mr-2">Goal:</span> 
-            {calculation.interpretation === "higher-is-better" && (
-              <span className="text-green-700 flex items-center">
-                Higher values are better
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                </svg>
-              </span>
-            )}
-            {calculation.interpretation === "lower-is-better" && (
-              <span className="text-blue-700 flex items-center">
-                Lower values are better
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </span>
-            )}
-            {calculation.interpretation === "middle-is-better" && (
-              <span className="text-purple-700 flex items-center">
-                Mid-range values are optimal
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7l4-4m0 0l4 4m-4-4v18" />
-                </svg>
-              </span>
-            )}
+          
+          <div className="border-t mt-2 pt-2">
+            <h4 className="font-semibold text-blue-800 mb-2">Goal:</h4>
+            <div className="text-gray-700 flex items-center">
+              {calculation.interpretation === "higher-is-better" && (
+                <span className="text-green-700 flex items-center">
+                  Higher values are better
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                  </svg>
+                </span>
+              )}
+              {calculation.interpretation === "lower-is-better" && (
+                <span className="text-blue-700 flex items-center">
+                  Lower values are better
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </span>
+              )}
+              {calculation.interpretation === "middle-is-better" && (
+                <span className="text-purple-700 flex items-center">
+                  Mid-range values are optimal
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7l4-4m0 0l4 4m-4-4v18" />
+                  </svg>
+                </span>
+              )}
+            </div>
+          </div>
+          
+          <div className="mt-2 text-xs text-gray-500">
+            <span className={`${getDimensionColor(dimension)} px-2 py-0.5 rounded-full text-xs`}>
+              {dimension.charAt(0).toUpperCase() + dimension.slice(1)} Metric
+            </span>
           </div>
         </div>
       )}
@@ -1618,6 +1686,14 @@ const DXCore4Dashboard = () => {
                     {insights.filter(insight => insight.type === 'negative' || insight.type === 'warning').length === 0 && (
                       <p className="text-gray-500 italic">No issues requiring attention</p>
                     )}
+                    <div className="p-4 rounded-lg bg-amber-50 border border-amber-200">
+                      <h4 className="font-medium text-amber-800 mb-2">Demo Alert</h4>
+                      <p className="text-sm text-amber-700">Change failure rate increased by 2.1% over the last week. Investigate recent deployment practices.</p>
+                      <div className="mt-2 flex items-center">
+                        <div className="bg-amber-100 text-amber-800 text-xs px-2 py-1 rounded-full">Quality</div>
+                        <span className="ml-2 text-amber-600 text-xs">⚠️ Requires immediate attention</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
