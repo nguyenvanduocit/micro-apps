@@ -21,23 +21,11 @@ const artifacts: Artifact[] = [
     path: '/dashboard'
   },
   {
-    id: 'case-studies',
-    title: 'Case Studies Library',
-    description: 'Explore detailed case studies from organizations that have successfully implemented the DX Core 4 framework with measurable outcomes.',
-    path: '/case-studies'
+    id: 'dx-core4-survey',
+    title: 'DX Core 4 Survey Tool',
+    description: 'Interactive survey tool to measure the 14 dimensions of developer experience and calculate your DXI score with targeted improvement recommendations.',
+    path: '/dx-core4-survey'
   },
-  {
-    id: 'interactive-tutorial',
-    title: 'Interactive Framework Tutorial',
-    description: 'Step-by-step interactive guide to understanding and implementing the DX Core 4 framework in your organization with practical exercises.',
-    path: '/interactive-tutorial'
-  },
-  {
-    id: 'advanced-visualizations',
-    title: 'Advanced Metrics Visualizations',
-    description: 'Customizable visualization tools for deeper insights into your DX metrics across different timeframes, teams, and organizational contexts.',
-    path: '/advanced-visualizations'
-  }
   // Add more artifacts here as they become available
 ];
 

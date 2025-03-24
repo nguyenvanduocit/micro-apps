@@ -84,7 +84,7 @@ export default function DXCoreFramework() {
         'Regrettable attrition',
         'Meeting time',
         'Build time',
-        'Workflow friction points'
+        'DXI components'
       ]
     },
     {
@@ -134,9 +134,9 @@ export default function DXCoreFramework() {
       metrics: [
         // Impact metrics
         'Percentage of time spent on new capabilities',
-        'Initiative progress and ROI',
+        'Initiative ROI',
         'Revenue per engineer',
-        'R&D as percentage of revenue',
+        'R&D revenue ratio',
         // Effectiveness metrics
         'Developer Experience Index (DXI)',
         'Regrettable attrition'
@@ -187,7 +187,7 @@ export default function DXCoreFramework() {
       metrics: [
         // Impact metrics
         'Percentage of time spent on new capabilities',
-        'Initiative progress and ROI',
+        'Initiative ROI',
         'Revenue per engineer',
         // Effectiveness metrics
         'Developer Experience Index (DXI)',
@@ -247,11 +247,11 @@ export default function DXCoreFramework() {
   const activityDetails: ActivityDetails = {
     'a1': {
       description: 'Allocate appropriate budget and resources for metric collection tools and infrastructure. Review and approve the proposed metrics framework ensuring alignment with organizational objectives.',
-      metrics: ['Initiative progress and ROI', 'Percentage of time spent on new capabilities', 'Developer Experience Index (DXI)']
+      metrics: ['Initiative ROI', 'Percentage of time spent on new capabilities', 'Developer Experience Index (DXI)']
     },
     'a2': {
       description: 'Analyze collected data to identify areas with highest potential impact. Prioritize improvement initiatives based on estimated return on investment and strategic alignment.',
-      metrics: ['Percentage of time spent on new capabilities', 'Initiative progress and ROI', 'Revenue per engineer']
+      metrics: ['Percentage of time spent on new capabilities', 'Initiative ROI', 'Revenue per engineer']
     },
     'a3': {
       description: 'Identify and define concrete metrics that reflect engineering productivity, quality, and alignment with business goals. Ensure metrics are objective, measurable, and actionable.',
@@ -287,19 +287,19 @@ export default function DXCoreFramework() {
     },
     'a11': {
       description: 'Work with stakeholders to define clear business objectives and establish metrics that align engineering efforts with business goals. Create a framework for measuring the business impact of engineering initiatives.',
-      metrics: ['Percentage of time spent on new capabilities', 'Initiative progress and ROI', 'Revenue per engineer']
+      metrics: ['Percentage of time spent on new capabilities', 'Initiative ROI', 'Revenue per engineer']
     },
     'a12': {
       description: 'Analyze current state of business impact metrics, including time allocation, ROI of initiatives, and engineering productivity in terms of business value delivered.',
-      metrics: ['Percentage of time spent on new capabilities', 'Initiative progress and ROI', 'Revenue per engineer']
+      metrics: ['Percentage of time spent on new capabilities', 'Initiative ROI', 'Revenue per engineer']
     },
     'a13': {
       description: 'Ensure improvement initiatives are tied to business outcomes. Balance technical improvements with feature development needs. Guide prioritization decisions based on data.',
-      metrics: ['Percentage of time spent on new capabilities', 'Initiative progress and ROI', 'Developer Experience Index (DXI)']
+      metrics: ['Percentage of time spent on new capabilities', 'Initiative ROI', 'Developer Experience Index (DXI)']
     },
     'a14': {
       description: 'Continuously track business impact metrics, adjust priorities based on data, and ensure engineering improvements translate to business value. Maintain alignment between technical and business objectives.',
-      metrics: ['Initiative progress and ROI', 'Revenue per engineer', 'Developer Experience Index (DXI)', 'Ease of delivery']
+      metrics: ['Initiative ROI', 'Revenue per engineer', 'Developer Experience Index (DXI)', 'Ease of delivery']
     },
     'a15': {
       description: 'Provide practical feedback on proposed metrics to ensure they capture meaningful aspects of the development process and developer experience.',
@@ -319,7 +319,7 @@ export default function DXCoreFramework() {
     },
     'a19': {
       description: 'Provide direction to Technical Leads on solution design, review proposed technical solutions, and grant approval based on alignment with team improvement goals and business objectives. Ensure solutions have measurable success criteria.',
-      metrics: ['Diffs per engineer', 'Developer Experience Index (DXI)', 'Ease of delivery', 'Lead time', 'Initiative progress and ROI']
+      metrics: ['Diffs per engineer', 'Developer Experience Index (DXI)', 'Ease of delivery', 'Lead time', 'Initiative ROI']
     }
   };
 
@@ -359,7 +359,7 @@ export default function DXCoreFramework() {
       challenges: 'Complexity of setup, time to collect data',
       examples: [
         'Time savings from tools like Copilot',
-        'Friction points in real-time workflows'
+        'DXI component measurements in real-time'
       ]
     }
   ];
@@ -660,8 +660,8 @@ export default function DXCoreFramework() {
         target: 'Balance based on product lifecycle stage'
       }
     },
-    'Initiative progress and ROI': {
-      name: 'Initiative progress and ROI',
+    'Initiative ROI': {
+      name: 'Initiative ROI',
       description: 'Tracks the advancement and return on investment of key engineering initiatives. Links technical efforts to business outcomes and value creation.',
       examples: [
         'Progress against initiative milestones',
@@ -804,38 +804,51 @@ export default function DXCoreFramework() {
   };
 
   return (
-    <div className="p-4 max-w-6xl mx-auto">
-      <h1 className="text-2xl font-bold text-center text-blue-900 mb-4">
-        DX Core 4: Engineer Performance Measurement & Improvement Framework
-      </h1>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      {/* Header - consistent with dashboard */}
+      <header className="bg-white border-b border-gray-200 mb-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16">
+            <div className="flex items-center">
+              <h1 className="text-xl font-semibold text-gray-900">DX Core 4 Framework</h1>
+            </div>
+            <div className="flex items-center">
+              <span className="text-sm bg-blue-100 text-blue-800 px-3 py-1 rounded-full font-medium">
+                Implementation Phases
+              </span>
+            </div>
+          </div>
+        </div>
+      </header>
 
-      {/* Tabs */}
-      <div className="flex justify-center mb-6">
-        <button
-          className={`px-4 py-2 mr-2 rounded-md ${activeTab === 'why' ? 'bg-blue-700 text-white' : 'bg-gray-200'}`}
-          onClick={() => setActiveTab('why')}
-        >
-          Why Core DX
-        </button>
-        <button
-          className={`px-4 py-2 mr-2 rounded-md ${activeTab === 'roles' ? 'bg-blue-700 text-white' : 'bg-gray-200'}`}
-          onClick={() => setActiveTab('roles')}
-        >
-          Role Matrix
-        </button>
-        <button
-          className={`px-4 py-2 mr-2 rounded-md ${activeTab === 'metrics' ? 'bg-blue-700 text-white' : 'bg-gray-200'}`}
-          onClick={() => setActiveTab('metrics')}
-        >
-          Metrics Dashboard
-        </button>
-        <button
-          className={`px-4 py-2 rounded-md ${activeTab === 'core4' ? 'bg-blue-700 text-white' : 'bg-gray-200'}`}
-          onClick={() => setActiveTab('core4')}
-        >
-          Core 4 Dimensions
-        </button>
-      </div>
+      <div className="p-4 max-w-6xl mx-auto">
+        {/* Tabs */}
+        <div className="flex justify-center mb-6">
+          <button
+            className={`px-4 py-2 mr-2 rounded-md ${activeTab === 'why' ? 'bg-blue-700 text-white' : 'bg-gray-200'}`}
+            onClick={() => setActiveTab('why')}
+          >
+            Why Core DX
+          </button>
+          <button
+            className={`px-4 py-2 mr-2 rounded-md ${activeTab === 'roles' ? 'bg-blue-700 text-white' : 'bg-gray-200'}`}
+            onClick={() => setActiveTab('roles')}
+          >
+            Role Matrix
+          </button>
+          <button
+            className={`px-4 py-2 mr-2 rounded-md ${activeTab === 'metrics' ? 'bg-blue-700 text-white' : 'bg-gray-200'}`}
+            onClick={() => setActiveTab('metrics')}
+          >
+            Metrics Dashboard
+          </button>
+          <button
+            className={`px-4 py-2 rounded-md ${activeTab === 'core4' ? 'bg-blue-700 text-white' : 'bg-gray-200'}`}
+            onClick={() => setActiveTab('core4')}
+          >
+            Core 4 Dimensions
+          </button>
+        </div>
 
       {/* Why Core DX Content */}
       {activeTab === 'why' && (
@@ -843,10 +856,13 @@ export default function DXCoreFramework() {
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-blue-900 mb-3">Why DX Core 4 Framework?</h2>
             <p className="text-gray-600 max-w-3xl mx-auto">
-              The DX Core 4 framework provides a structured, comprehensive approach to measuring and improving developer experience through four essential dimensions: Speed, Effectiveness, Quality, and Impact. Developed by Laura Tacho (DX CTO) and Abi Noda (DX Co-founder) in collaboration with authors of previous frameworks, DX Core 4 unifies DORA, SPACE, and DevEx methodologies into a balanced scorecard for engineering performance.
+              Every great engineering culture begins with a fundamental belief: <span className="font-medium text-blue-700">developers deserve tools and environments that enable their best work</span>. We believe that when developers thrive, organizations innovate faster, build better products, and create more value for customers. This isn't just about engineering productivity—it's about unlocking human potential.
             </p>
-            <p className="text-blue-600 mt-3 font-medium text-sm">
-              "Speed is great, but if you're going faster while being less effective, that's not great. Business impact is great, but if you're having a lot of business impact but your quality is going down, that's not great either." - Laura Tacho
+            <p className="text-gray-600 max-w-3xl mx-auto mt-3">
+              The DX Core 4 framework exists to transform this belief into measurable action, balancing Speed, Effectiveness, Quality, and Impact. It's not just what we measure, but why we measure that truly matters. We measure these dimensions not to control, but to liberate—to remove the barriers between developers and their most inspired work.
+            </p>
+            <p className="text-blue-600 mt-4 font-medium">
+              "The most powerful engineering cultures don't just ship code faster—they create environments where developers can do the most meaningful work of their careers."
             </p>
           </div>
 
@@ -932,26 +948,6 @@ export default function DXCoreFramework() {
             </div>
           </div>
 
-          <div className="bg-blue-50 rounded-lg p-6 mt-6">
-            <h3 className="text-xl font-bold text-blue-900 mb-4">Business Outcomes</h3>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="bg-white rounded p-4 shadow-sm">
-                <div className="text-2xl font-bold text-blue-600 mb-2">3-12%</div>
-                <p className="text-sm text-gray-600">Overall increase in engineering efficiency</p>
-              </div>
-              <div className="bg-white rounded p-4 shadow-sm">
-                <div className="text-2xl font-bold text-blue-600 mb-2">14%</div>
-                <p className="text-sm text-gray-600">Increase in R&D time spent on feature development</p>
-              </div>
-              <div className="bg-white rounded p-4 shadow-sm">
-                <div className="text-2xl font-bold text-blue-600 mb-2">15%</div>
-                <p className="text-sm text-gray-600">Improvement in employee engagement scores</p>
-              </div>
-            </div>
-            <div className="mt-4 text-sm text-gray-700 italic">
-              *Based on data from 300+ organizations that have implemented the DX Core 4 framework
-            </div>
-          </div>
         </div>
       )}
 
@@ -1096,6 +1092,7 @@ export default function DXCoreFramework() {
               </React.Fragment>
             ))}
           </div>
+
 
           {/* Legend section - moved inside roles tab */}
           <div className="mt-4 p-4 bg-gray-100 rounded-md">
@@ -1368,6 +1365,7 @@ export default function DXCoreFramework() {
 
       <div className="mt-6 text-center text-sm text-gray-500">
         <p>Click on any activity card to view detailed information and related metrics. Switch tabs to see metrics dashboard and Core 4 dimensions.</p>
+      </div>
       </div>
     </div>
   );
