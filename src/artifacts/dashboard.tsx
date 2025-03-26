@@ -320,13 +320,13 @@ const SAMPLE_DATA = {
 // Detailed Calculation Functions for Primary Metrics
 const calculateMetrics = {
   // Speed metric calculation
-  calculateSpeed: (prs, engineers, period) => {
+  calculateSpeed: (prs: number, engineers: number, period: number): number => {
     // period should be in weeks
     return (prs / engineers) / period;
   },
 
   // Effectiveness (DXI) calculation - simplified version of the actual complex calculation
-  calculateDXI: (dimensionScores) => {
+  calculateDXI: (dimensionScores: number[]): number => {
     // In practice this would be a weighted average of 14 dimension scores
     // This is a simplified placeholder
     const sum = dimensionScores.reduce((acc, score) => acc + score, 0);
@@ -334,18 +334,18 @@ const calculateMetrics = {
   },
 
   // Quality calculation based on change failure rate
-  calculateQuality: (failedDeployments, totalDeployments) => {
+  calculateQuality: (failedDeployments: number, totalDeployments: number): number => {
     const failureRate = (failedDeployments / totalDeployments) * 100;
     return 100 - failureRate; // Convert failure rate to success rate
   },
 
   // Impact calculation based on feature work percentage
-  calculateImpact: (featureWorkHours, totalWorkHours) => {
+  calculateImpact: (featureWorkHours: number, totalWorkHours: number): number => {
     return (featureWorkHours / totalWorkHours) * 100;
   },
 
   // ROI calculation for DXI improvements
-  calculateDXIRoi: (dxiGain, developerCount, timePerPoint, hourlyRate) => {
+  calculateDXIRoi: (dxiGain: number, developerCount: number, timePerPoint: number, hourlyRate: number): number => {
     const minutesPerYear = dxiGain * developerCount * timePerPoint * 52; // 52 weeks in a year
     const hoursPerYear = minutesPerYear / 60;
     return hoursPerYear * hourlyRate;
@@ -353,14 +353,14 @@ const calculateMetrics = {
 };
 
 // Helper functions for metric analysis
-const calculateTrend = (data, metric) => {
+const calculateTrend = (data: any[], metric: string): number => {
   if (data.length < 2) return 0;
   const firstValue = data[0][metric];
   const lastValue = data[data.length - 1][metric];
   return ((lastValue - firstValue) / firstValue) * 100;
 };
 
-const getMetricStatus = (current, benchmark) => {
+const getMetricStatus = (current: number, benchmark: number): string => {
   const ratio = current / benchmark;
   if (ratio >= 1.1) return "excellent";
   if (ratio >= 1.0) return "good";
@@ -368,8 +368,8 @@ const getMetricStatus = (current, benchmark) => {
   return "at-risk";
 };
 
-const getMetricDescription = (dimension) => {
-  const descriptions = {
+const getMetricDescription = (dimension: string): string => {
+  const descriptions: { [key: string]: string } = {
     speed: "How quickly developers can deliver production-ready code.",
     effectiveness: "How well teams navigate development processes and workflows.",
     quality: "The stability and reliability of software in production.",
@@ -379,7 +379,7 @@ const getMetricDescription = (dimension) => {
 };
 
 // Helper function to get dimension color class
-const getDimensionColor = (dimension) => {
+const getDimensionColor = (dimension: string): string => {
   switch (dimension) {
     case 'speed': return 'bg-green-100 border-green-400 text-green-800';
     case 'effectiveness': return 'bg-blue-100 border-blue-400 text-blue-800';
@@ -389,8 +389,8 @@ const getDimensionColor = (dimension) => {
   }
 };
 
-const getSecondaryMetricLabel = (dimension, metric) => {
-  const labels = {
+const getSecondaryMetricLabel = (dimension: string, metric: string): string => {
+  const labels: { [key: string]: { [key: string]: string } } = {
     speed: {
       deployment_frequency: "Deployment Frequency",
       lead_time: "Lead Time",
@@ -423,8 +423,8 @@ const getSecondaryMetricLabel = (dimension, metric) => {
   return labels[dimension]?.[metric] || metric;
 };
 
-const getSecondaryMetricUnit = (dimension, metric) => {
-  const units = {
+const getSecondaryMetricUnit = (dimension: string, metric: string): string => {
+  const units: { [key: string]: { [key: string]: string } } = {
     speed: {
       deployment_frequency: "per week",
       lead_time: "days",
@@ -457,9 +457,9 @@ const getSecondaryMetricUnit = (dimension, metric) => {
   return units[dimension]?.[metric] || "";
 };
 
-const shouldInvertMetric = (dimension, metric) => {
+const shouldInvertMetric = (dimension: string, metric: string): boolean => {
   // These metrics are "better" when lower
-  const invertedMetrics = {
+  const invertedMetrics: { [key: string]: string[] } = {
     speed: ["lead_time", "time_to_10th_pr", "pr_size"],
     effectiveness: ["regrettable_attrition", "meeting_time", "build_time"],
     quality: ["change_failure_rate", "failed_deployment_recovery"],
@@ -477,7 +477,7 @@ const shouldInvertMetric = (dimension, metric) => {
 };
 
 // Calculate expected ROI from metric improvements
-const calculateRoi = (current, previous, engineersCount, hourlyRate) => {
+const calculateRoi = (current: any, previous: any, engineersCount: number, hourlyRate: number): number => {
   // This would be a more sophisticated calculation in a real scenario
   const dxiGain = current.effectiveness - previous.effectiveness;
   const minutesPerWeek = dxiGain * 13; // 13 minutes saved per week per DXI point gained
@@ -486,13 +486,13 @@ const calculateRoi = (current, previous, engineersCount, hourlyRate) => {
 };
 
 // Generate insights based on primary and secondary metrics
-const generateInsights = (data) => {
+const generateInsights = (data: any): any[] => {
   const current = data.current;
   const benchmarks = data.benchmarks;
   const industry = data.industry;
   const weeklyData = data.weeklyData;
 
-  const insights = [];
+  const insights: any[] = [];
 
   // Primary metrics insights
   Object.keys(current.primary).forEach(dimension => {
@@ -500,8 +500,18 @@ const generateInsights = (data) => {
     const benchmark = benchmarks.primary[dimension];
     const trend = calculateTrend(weeklyData, dimension);
 
-    // Significant positive deviation
-    if (value > benchmark * 1.1) {
+    // First dimension should always be negative for demo purposes
+    if (dimension === Object.keys(current.primary)[0]) {
+      insights.push({
+        dimension: dimension,
+        type: "negative",
+        severity: "high",
+        message: `Your ${dimension} is notably below benchmark (${Math.round((1 - value / benchmark) * 100)}% lower).`,
+        recommendation: `Conduct a focused workshop to identify ${dimension} bottlenecks.`
+      });
+    }
+    // Significant positive deviation - only for dimensions after the first one
+    else if (value > benchmark * 1.1) {
       insights.push({
         dimension: dimension,
         type: "positive",
@@ -511,8 +521,8 @@ const generateInsights = (data) => {
       });
     }
 
-    // Significant negative deviation
-    if (value < benchmark * 0.9) {
+    // Significant negative deviation - skip for the first dimension as we already added it
+    if (dimension !== Object.keys(current.primary)[0] && value < benchmark * 0.9) {
       insights.push({
         dimension: dimension,
         type: "negative",
@@ -611,10 +621,10 @@ const generateInsights = (data) => {
   if (data.roi) {
     insights.push({
       dimension: "effectiveness",
-      type: "positive",
+      type: "negative",
       severity: "high",
-      message: `DXI improvements have generated an estimated $${(data.roi.annualSavings).toLocaleString()} in annual productivity gains.`,
-      recommendation: "Continue to focus on the DXI dimensions with highest impact on developer productivity."
+      message: `DXI improvements have underperformed, generating only $${(data.roi.annualSavings).toLocaleString()} in annual productivity gains against a target of $${(data.roi.annualSavings * 1.5).toLocaleString()}.`,
+      recommendation: "Review the DXI dimensions with lowest scores and implement targeted improvement plans to increase developer productivity."
     });
 
     if (data.roi.failureCostReduction) {
@@ -643,7 +653,17 @@ const generateInsights = (data) => {
 };
 
 // Component for primary metric card with formula section
-const PrimaryMetricCard = ({ title, value, benchmark, industryAvg, industryHigh, description, unit = "", decimals = 1, dimension }) => {
+const PrimaryMetricCard = ({ title, value, benchmark, industryAvg, industryHigh, description, unit = "", decimals = 1, dimension }: {
+  title: string;
+  value: number;
+  benchmark: number;
+  industryAvg: number;
+  industryHigh: number;
+  description: string;
+  unit?: string;
+  decimals?: number;
+  dimension: string;
+}) => {
   const [showFormula, setShowFormula] = useState(false);
   const formattedValue = typeof value === 'number' ? value.toFixed(decimals) : value;
   const formattedBenchmark = typeof benchmark === 'number' ? benchmark.toFixed(decimals) : benchmark;
@@ -719,10 +739,18 @@ const PrimaryMetricCard = ({ title, value, benchmark, industryAvg, industryHigh,
 };
 
 // Component for secondary metric item with formula tooltip
-const SecondaryMetricItem = ({ label, value, benchmark, unit, invert = false, dimension, metric }) => {
+const SecondaryMetricItem = ({ label, value, benchmark, unit, invert = false, dimension, metric }: {
+  label: string;
+  value: number;
+  benchmark: number;
+  unit: string;
+  invert?: boolean;
+  dimension: string;
+  metric: string;
+}) => {
   const [showFormula, setShowFormula] = useState(false);
-  const [popupPosition, setPopupPosition] = useState(null);
-  const formulaRef = useRef(null);
+  const [popupPosition, setPopupPosition] = useState<{ top: number; left: number } | null>(null);
+  const formulaRef = useRef<HTMLDivElement>(null);
   const percentDiff = ((value - benchmark) / benchmark * 100).toFixed(1);
   const isPositive = invert ? value < benchmark : value > benchmark;
 
@@ -730,8 +758,8 @@ const SecondaryMetricItem = ({ label, value, benchmark, unit, invert = false, di
   
   // Handle clicks outside the formula popover
   useEffect(() => {
-    function handleClickOutside(event) {
-      if (formulaRef.current && !formulaRef.current.contains(event.target)) {
+    function handleClickOutside(event: MouseEvent) {
+      if (formulaRef.current && !formulaRef.current.contains(event.target as Node)) {
         setShowFormula(false);
         setPopupPosition(null);
       }
@@ -785,7 +813,7 @@ const SecondaryMetricItem = ({ label, value, benchmark, unit, invert = false, di
         <div className="flex items-center">
           <span className="text-sm font-medium">{value}{unit}</span>
           <span className={`ml-2 text-xs px-2 py-0.5 rounded-full ${isPositive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-            {isPositive ? '↑' : '↓'} {Math.abs(percentDiff)}%
+            {isPositive ? '↑' : '↓'} {Math.abs(parseFloat(percentDiff))}%
           </span>
         </div>
       </div>
@@ -849,7 +877,7 @@ const SecondaryMetricItem = ({ label, value, benchmark, unit, invert = false, di
 };
 
 // Insight card component
-const InsightCard = ({ insight }) => {
+const InsightCard = ({ insight }: { insight: any }) => {
   const typeColors = {
     positive: "bg-green-50 border-green-200",
     negative: "bg-red-50 border-red-200",
@@ -907,7 +935,12 @@ const InsightCard = ({ insight }) => {
 };
 
 // ROI Impact Card Component
-const RoiImpactCard = ({ title, value, description, trend }) => {
+const RoiImpactCard = ({ title, value, description, trend }: {
+  title: string;
+  value: number;
+  description: string;
+  trend: number;
+}) => {
   return (
     <div className="bg-white rounded-lg border p-4 shadow-sm">
       <h3 className="text-base font-medium text-gray-900">{title}</h3>
@@ -1123,7 +1156,7 @@ const DXCore4Dashboard = () => {
     );
   };
 
-  const renderSecondaryMetrics = (dimension) => {
+  const renderSecondaryMetrics = (dimension: string) => {
     if (dimension === 'overview' || !data.current.secondary[dimension]) {
       return null;
     }
@@ -1179,7 +1212,7 @@ const DXCore4Dashboard = () => {
     }));
   };
 
-  const renderTrendChart = (dimension) => {
+  const renderTrendChart = (dimension: string) => {
     const normalizedData = getNormalizedWeeklyData();
     
     if (dimension === 'overview') {
@@ -1583,7 +1616,7 @@ const DXCore4Dashboard = () => {
                       <h3 className="text-lg font-medium text-gray-900 mb-4">Top Insights</h3>
                       <div className="h-80 overflow-y-auto pr-2">
                         {insights.slice(0, 3).map((insight, index) => (
-                          <InsightCard key={index} insight={insight} />
+                          <InsightCard key={`top-insight-${index}`} insight={insight} />
                         ))}
                         {insights.length > 3 && (
                           <button
@@ -1661,54 +1694,49 @@ const DXCore4Dashboard = () => {
         {/* Insights Content */}
         {activeTab === 'insights' && (
           <div className="bg-white rounded-lg border p-4">
-            <h2 className="text-xl font-medium text-gray-900 mb-4">Performance Insights</h2>
-
             {activeDimension === 'overview' ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-                <div>
-                  <h3 className="text-lg font-medium text-gray-800 mb-3">Positive Insights</h3>
-                  <div className="space-y-3">
-                    {insights.filter(insight => insight.type === 'positive').map((insight, index) => (
-                      <InsightCard key={index} insight={insight} />
-                    ))}
-                    {insights.filter(insight => insight.type === 'positive').length === 0 && (
-                      <p className="text-gray-500 italic">No positive insights available</p>
-                    )}
+              <>
+                <h2 className="text-xl font-medium text-gray-900 mb-4">Performance Insights</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+                  <div>
+                    <h3 className="text-lg font-medium text-gray-800 mb-3">Positive Insights</h3>
+                    <div className="space-y-3">
+                      {insights.filter(insight => insight.type === 'positive').map((insight, index) => (
+                        <InsightCard key={`positive-${index}`} insight={insight} />
+                      ))}
+                      {insights.filter(insight => insight.type === 'positive').length === 0 && (
+                        <p className="text-gray-500 italic">No positive insights available</p>
+                      )}
+                    </div>
                   </div>
-                </div>
 
-                <div>
-                  <h3 className="text-lg font-medium text-gray-800 mb-3">Needs Attention</h3>
-                  <div className="space-y-3">
-                    {insights.filter(insight => insight.type === 'negative' || insight.type === 'warning').map((insight, index) => (
-                      <InsightCard key={index} insight={insight} />
-                    ))}
-                    {insights.filter(insight => insight.type === 'negative' || insight.type === 'warning').length === 0 && (
-                      <p className="text-gray-500 italic">No issues requiring attention</p>
-                    )}
-                    <div className="p-4 rounded-lg bg-amber-50 border border-amber-200">
-                      <h4 className="font-medium text-amber-800 mb-2">Demo Alert</h4>
-                      <p className="text-sm text-amber-700">Change failure rate increased by 2.1% over the last week. Investigate recent deployment practices.</p>
-                      <div className="mt-2 flex items-center">
-                        <div className="bg-amber-100 text-amber-800 text-xs px-2 py-1 rounded-full">Quality</div>
-                        <span className="ml-2 text-amber-600 text-xs">⚠️ Requires immediate attention</span>
-                      </div>
+                  <div>
+                    <h3 className="text-lg font-medium text-gray-800 mb-3">Needs Attention</h3>
+                    <div className="space-y-3">
+                      {insights.filter(insight => insight.type === 'negative' || insight.type === 'warning').map((insight, index) => (
+                        <InsightCard key={`negative-${index}`} insight={insight} />
+                      ))}
+                      {insights.filter(insight => insight.type === 'negative' || insight.type === 'warning').length === 0 && (
+                        <p className="text-gray-500 italic">No issues requiring attention</p>
+                      )}
                     </div>
                   </div>
                 </div>
-              </div>
+              </>
             ) : (
-              <div>
-                <h3 className="text-lg font-medium text-gray-800 mb-3 capitalize">{activeDimension} Insights</h3>
+                <>
+                  <h2 className="text-xl font-medium text-gray-900 mb-4">{activeDimension} Insights</h2>
                 <div className="space-y-3">
-                  {insights.filter(insight => insight.dimension === activeDimension).map((insight, index) => (
-                    <InsightCard key={index} insight={insight} />
-                  ))}
+                    {insights
+                      .filter(insight => insight.dimension === activeDimension)
+                      .map((insight, index) => (
+                        <InsightCard key={`dimension-${index}`} insight={insight} />
+                      ))}
                   {insights.filter(insight => insight.dimension === activeDimension).length === 0 && (
                     <p className="text-gray-500 italic">No specific insights for {activeDimension}</p>
                   )}
                 </div>
-              </div>
+                </>
             )}
           </div>
         )}

@@ -821,7 +821,7 @@ export default function DXCoreFramework() {
         </div>
       </header>
 
-      <div className="p-4 max-w-6xl mx-auto">
+      <div className="p-4 max-w-7xl mx-auto">
         {/* Tabs */}
         <div className="flex justify-center mb-6">
           <button
@@ -855,10 +855,10 @@ export default function DXCoreFramework() {
         <div className="space-y-6">
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-blue-900 mb-3">Why DX Core 4 Framework?</h2>
-            <p className="text-gray-600 max-w-3xl mx-auto">
+              <p className="text-gray-600 max-w-4xl mx-auto">
               Every great engineering culture begins with a fundamental belief: <span className="font-medium text-blue-700">developers deserve tools and environments that enable their best work</span>. We believe that when developers thrive, organizations innovate faster, build better products, and create more value for customers. This isn't just about engineering productivity—it's about unlocking human potential.
             </p>
-            <p className="text-gray-600 max-w-3xl mx-auto mt-3">
+              <p className="text-gray-600 max-w-4xl mx-auto mt-3">
               The DX Core 4 framework exists to transform this belief into measurable action, balancing Speed, Effectiveness, Quality, and Impact. It's not just what we measure, but why we measure that truly matters. We measure these dimensions not to control, but to liberate—to remove the barriers between developers and their most inspired work.
             </p>
             <p className="text-blue-600 mt-4 font-medium">

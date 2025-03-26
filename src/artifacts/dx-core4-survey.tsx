@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from 'recharts';
 
 type DimensionQuestion = {
@@ -14,164 +14,128 @@ type SurveyResults = {
   [key: string]: number;
 };
 
-type CategoryColors = {
-  [key: string]: string;
-};
-
 export default function DXCore4Survey() {
   const [currentStep, setCurrentStep] = useState(0);
   const [results, setResults] = useState<SurveyResults>({});
   const [teamName, setTeamName] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [activeTab, setActiveTab] = useState<'intro' | 'survey' | 'results'>('intro');
-  const popupRef = useRef<HTMLDivElement>(null);
-
-  // Category colors for visual grouping
-  const categoryColors: CategoryColors = {
-    technical: 'bg-blue-500',
-    team: 'bg-purple-500',
-    product: 'bg-orange-500'
-  };
-
-  const categoryTextColors: CategoryColors = {
-    technical: 'text-blue-700',
-    team: 'text-purple-700',
-    product: 'text-orange-700'
-  };
+  const [submissionStatus, setSubmissionStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
 
   // DX Core 4 survey questions
   const surveyQuestions: DimensionQuestion[] = [
     {
       id: 'deep_work',
       dimension: 'Deep Work',
-      question: 'How often are you able to focus without interruption for 2+ hours?',
-      description: 'Ability to concentrate on complex tasks without interruptions or context switching',
+      question: 'Bạn có thể tập trung làm việc không bị gián đoạn trong hơn 2 giờ thường xuyên đến mức nào?',
+      description: 'Khả năng tập trung vào các task phức tạp mà không bị gián đoạn hoặc chuyển đổi context',
       category: 'team',
       weight: 2.5 // Very high priority - currently main team focus
     },
     {
       id: 'local_iteration',
       dimension: 'Local Iteration',
-      question: 'How quick and reliable is local development/testing?',
-      description: 'Speed and reliability of local development environment for iterative work',
+      question: 'Môi trường develop/test cục bộ của bạn nhanh và đáng tin cậy đến mức nào?',
+      description: 'Tốc độ và độ tin cậy của môi trường develop cục bộ cho công việc lặp đi lặp lại',
       category: 'technical',
       weight: 1.0 // Standard priority
     },
     {
       id: 'release_process',
       dimension: 'Release Process',
-      question: 'How reliable is the process for delivering code to production?',
-      description: 'Efficiency and reliability of the deployment pipeline',
+      question: 'Quy trình đưa code lên môi trường production đáng tin cậy đến mức nào?',
+      description: 'Hiệu quả và độ tin cậy của quy trình deploy',
       category: 'technical',
       weight: 1.0 // Standard priority
     },
     {
       id: 'making_changes',
       dimension: 'Making Changes',
-      question: 'How confident are you in making changes to unfamiliar code?',
-      description: 'Level of comfort when modifying code you didn\'t write or aren\'t familiar with',
+      question: 'Bạn tự tin đến mức nào khi thực hiện thay đổi đối với code không quen thuộc?',
+      description: 'Mức độ thoải mái khi sửa đổi code bạn không viết hoặc không quen thuộc',
       category: 'technical',
       weight: 1.0 // Standard priority
     },
     {
       id: 'technical_debt',
       dimension: 'Technical Debt',
-      question: 'How much does technical debt slow down development?',
-      description: 'Impact of legacy code, poor design decisions, or shortcuts on development velocity',
+      question: 'Nợ kỹ thuật làm chậm quá trình develop đến mức nào?',
+      description: 'Tác động của code cũ, quyết định thiết kế kém, hoặc lối tắt đến tốc độ develop',
       category: 'technical',
       weight: 1.0 // Standard priority
     },
     {
       id: 'architecture',
       dimension: 'Architecture',
-      question: 'How clear is the system architecture to the team?',
-      description: 'Understanding of system components, boundaries, and interactions',
+      question: 'Kiến trúc hệ thống rõ ràng đối với nhóm đến mức nào?',
+      description: 'Hiểu biết về các thành phần hệ thống, ranh giới và tương tác',
       category: 'technical',
       weight: 1.0 // Standard priority
     },
     {
       id: 'tooling',
       dimension: 'Tooling',
-      question: 'How well do dev tools support your daily work?',
-      description: 'Effectiveness of tooling for development, testing, and debugging',
+      question: 'Công cụ develop hỗ trợ công việc hàng ngày của bạn tốt đến mức nào?',
+      description: 'Hiệu quả của công cụ cho develop, testing và debug',
       category: 'technical',
       weight: 1.0 // Standard priority
     },
     {
       id: 'documentation',
       dimension: 'Documentation',
-      question: 'How helpful is existing documentation for your work?',
-      description: 'Quality and accessibility of documentation for codebase and processes',
+      question: 'Tài liệu hiện có hữu ích cho công việc của bạn đến mức nào?',
+      description: 'Chất lượng và khả năng tiếp cận của tài liệu cho codebase và quy trình',
       category: 'technical',
       weight: 1.0 // Standard priority
     },
     {
       id: 'onboarding',
       dimension: 'Onboarding',
-      question: 'How effective is the onboarding process for new team members?',
-      description: 'Ease of getting new engineers productive on the team',
+      question: 'Quy trình onboarding cho thành viên mới trong team hiệu quả đến mức nào?',
+      description: 'Mức độ dễ dàng giúp engineer mới làm việc hiệu quả trong team',
       category: 'team',
       weight: 2.0 // High priority - currently focusing on team dimensions
     },
     {
       id: 'team_processes',
       dimension: 'Team Processes',
-      question: 'How well do team processes support productivity?',
-      description: 'Effectiveness of team ceremonies, communication channels, and workflows',
+      question: 'Quy trình team hỗ trợ productivity tốt đến mức nào?',
+      description: 'Hiệu quả của các nghi thức team, kênh communication và quy trình làm việc',
       category: 'team',
       weight: 2.2 // High priority - currently focusing on team dimensions
     },
     {
       id: 'collaboration',
       dimension: 'Collaboration',
-      question: 'How effectively does the team collaborate on projects?',
-      description: 'Quality of cross-functional teamwork and knowledge sharing',
+      question: 'Team cộng tác hiệu quả trên các project đến mức nào?',
+      description: 'Chất lượng làm việc nhóm cross-functional và knowledge sharing',
       category: 'team',
       weight: 2.3 // High priority - currently focusing on team dimensions
     },
     {
       id: 'vision',
       dimension: 'Vision',
-      question: 'How clear is the product vision to the engineering team?',
-      description: 'Understanding of long-term product goals and strategy',
+      question: 'Tầm nhìn sản phẩm rõ ràng đối với đội ngũ technical đến mức nào?',
+      description: 'Hiểu biết về mục tiêu và chiến lược sản phẩm dài hạn',
       category: 'product',
       weight: 1.0 // Standard priority
     },
     {
       id: 'requirements',
       dimension: 'Requirements',
-      question: 'How clear and complete are requirements before implementation?',
-      description: 'Quality of specifications and requirements provided before work begins',
+      question: 'Yêu cầu rõ ràng và đầy đủ trước khi implement đến mức nào?',
+      description: 'Chất lượng của đặc tả và yêu cầu được cung cấp trước khi bắt đầu công việc',
       category: 'product',
       weight: 1.0 // Standard priority
     },
     {
       id: 'product_management',
       dimension: 'Product Management',
-      question: 'How effective is collaboration with product management?',
-      description: 'Working relationship between engineering and product management',
+      question: 'Sự hợp tác với quản lý sản phẩm hiệu quả đến mức nào?',
+      description: 'Mối quan hệ làm việc giữa technical và quản lý sản phẩm',
       category: 'product',
       weight: 1.0 // Standard priority
     }
-  ];
-
-  // Handle clicks outside any popups
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (popupRef.current && !popupRef.current.contains(event.target as Node)) {
-        // Close any open popups or dialogs here
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
-  // Survey steps including intro and results
-  const steps = [
-    ...surveyQuestions.map(q => q.id)
   ];
 
   // Calculate DXI score (0-100)
@@ -212,9 +176,13 @@ export default function DXCore4Survey() {
     
     // Move to next question with a slight delay for UX
     setTimeout(() => {
-      // If last question, show results
+      // If last question, show results and auto-submit
       if (currentStep >= surveyQuestions.length - 1) {
         setActiveTab('results');
+        // Auto-submit when finishing the survey
+        if (!isSubmitted && submissionStatus !== 'submitting') {
+          handleSubmit();
+        }
       } else {
         setCurrentStep(prev => prev + 1);
       }
@@ -222,15 +190,41 @@ export default function DXCore4Survey() {
   };
 
   // Handle survey submission
-  const handleSubmit = () => {
-    // Here you would typically save the results to a backend
-    setIsSubmitted(true);
-    // In a real app, you might send this data to an API
-    console.log('Survey submitted:', {
+  const handleSubmit = async () => {
+    // Prepare data to send
+    const submissionData = {
       teamName,
       results,
-      dxiScore: calculateDXI(results)
-    });
+      dxiScore: calculateDXI(results),
+      timestamp: new Date().toISOString(),
+      categoryScores: getCategoryScores()
+    };
+
+    try {
+      setIsSubmitted(true);
+      setSubmissionStatus('submitting');
+
+      // Send data to webhook
+      const response = await fetch('https://n10n.aiocean.dev/webhook/c67dc58a-b20e-4ebf-bfe3-3b5c11352c8f', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(submissionData),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Submission failed: ${response.status}`);
+      }
+
+      setSubmissionStatus('success');
+      console.log('Survey submitted successfully');
+    } catch (error) {
+      console.error('Error submitting survey:', error);
+      // Reset submitted state if there was an error
+      setSubmissionStatus('error');
+      setIsSubmitted(false);
+    }
   };
 
   // Prepare data for radar chart
@@ -275,18 +269,25 @@ export default function DXCore4Survey() {
     };
   };
 
+  // Modify setActiveTab to trigger submission when viewing results
+  useEffect(() => {
+    if (activeTab === 'results' && !isSubmitted && submissionStatus !== 'submitting' && Object.keys(results).length > 0) {
+      handleSubmit();
+    }
+  }, [activeTab, isSubmitted, submissionStatus, results]);
+
   // Render the intro tab
   const renderIntroTab = () => {
     return (
       <div className="text-center">
         <h1 className="text-2xl font-bold text-blue-900 mb-4">Developer Experience (DX) Core 4 Survey</h1>
-        <p className="mb-6 text-gray-700 max-w-3xl mx-auto">
+        <p className="mb-6 text-gray-700 max-w-4xl mx-auto">
           This survey measures the 14 dimensions of developer experience that make up the Developer Experience Index (DXI),
           a key component of the Effectiveness dimension in the DX Core 4 framework.
           Some dimensions have higher weights as they impact developer productivity more significantly.
         </p>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 max-w-5xl mx-auto">
           <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
             <h3 className="font-semibold text-blue-800 mb-3 flex items-center">
               <div className="h-4 w-4 bg-blue-500 rounded-full mr-2"></div>
@@ -359,18 +360,7 @@ export default function DXCore4Survey() {
             placeholder="Enter your team name"
           />
         </div>
-        
-        <div className="bg-blue-50 p-4 rounded-lg max-w-md mx-auto mb-6">
-          <h3 className="font-semibold text-blue-800 mb-2">Instructions:</h3>
-          <ul className="text-left text-sm text-blue-900 space-y-2">
-            <li>• Rate each dimension on a scale from 0 (very poor) to 10 (excellent)</li>
-            <li>• Be honest - this data helps identify real improvement areas</li>
-            <li>• Consider your experience over the past 3 months</li>
-            <li>• Pay attention to high-priority dimensions (marked with weight multiplier)</li>
-            <li>• The survey takes approximately 5-7 minutes to complete</li>
-          </ul>
-        </div>
-        
+
         <button
           className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
           onClick={() => {
@@ -388,8 +378,15 @@ export default function DXCore4Survey() {
   const renderSurveyTab = () => {
     const currentQuestion = surveyQuestions[currentStep];
     
+    if (!currentQuestion) {
+      // Redirect to intro if currentQuestion is undefined
+      setActiveTab('intro');
+      setCurrentStep(0);
+      return null;
+    }
+
     return (
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         <div className="mb-6 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-blue-900">DX Core 4 Survey</h1>
           <span className="text-sm font-medium bg-blue-100 text-blue-800 px-3 py-1 rounded-full">
@@ -515,13 +512,41 @@ export default function DXCore4Survey() {
       .slice(0, 3);
     
     return (
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-5xl mx-auto">
         <h1 className="text-2xl font-bold text-blue-900 mb-4 text-center">Your DX Core 4 Results</h1>
         
         {teamName && (
           <p className="text-center text-gray-700 mb-4">Team: {teamName}</p>
         )}
         
+        {submissionStatus === 'success' && (
+          <div className="mb-6 p-3 bg-green-50 border border-green-200 text-green-800 rounded flex items-center justify-center">
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            Survey successfully submitted. Thank you for your feedback!
+          </div>
+        )}
+
+        {submissionStatus === 'error' && (
+          <div className="mb-6 p-3 bg-red-50 border border-red-200 text-red-800 rounded flex items-center justify-center">
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            There was an error submitting your survey. Please try again.
+          </div>
+        )}
+
+        {submissionStatus === 'submitting' && (
+          <div className="mb-6 p-3 bg-blue-50 border border-blue-200 text-blue-800 rounded flex items-center justify-center">
+            <svg className="animate-spin w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Submitting your survey...
+          </div>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white rounded-lg shadow-md p-6 border-t-4 border-blue-500 text-center">
             <h2 className="text-lg font-semibold text-gray-700 mb-4">Developer Experience Index</h2>
@@ -689,44 +714,31 @@ export default function DXCore4Survey() {
             )}
           </div>
         </div>
-        
-        <div className="bg-blue-50 p-6 rounded-lg mb-8">
-          <h2 className="text-lg font-semibold text-blue-900 mb-4">What This Means for Your Team</h2>
-          <p className="text-gray-700 mb-4">
-            Your DXI score of <span className="font-bold">{dxiScore}</span> translates to approximately <span className="font-bold">{Math.round(dxiScore * 1.3)}</span> minutes saved per developer per week,
-            or about <span className="font-bold">{Math.round(dxiScore * 1.3 * 50)}</span> hours per developer annually.
-          </p>
-          
-          <h3 className="font-medium text-blue-800 mb-2">Recommendations:</h3>
-          <ul className="list-disc pl-5 text-gray-700 space-y-1">
-            <li>Focus first on addressing your lowest-scoring <strong>high-priority dimensions</strong> for maximum impact</li>
-            <li>Target one dimension at a time with specific improvement initiatives</li>
-            <li>Pay special attention to dimensions with higher weights (1.5x or higher)</li>
-            <li>Resurvey every 3-6 months to track progress</li>
-            <li>Use your strengths to help improve other dimensions</li>
-          </ul>
-        </div>
-        
+
         <div className="flex justify-center">
-          <button
-            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors mr-3"
-            onClick={handleSubmit}
-            disabled={isSubmitted}
-          >
-            {isSubmitted ? 'Submitted' : 'Submit Results'}
-          </button>
-          
-          <button
-            className="px-6 py-2 bg-white border border-blue-600 text-blue-600 rounded-md hover:bg-blue-50 transition-colors"
-            onClick={() => {
-              setResults({});
-              setCurrentStep(0);
-              setIsSubmitted(false);
-              setActiveTab('intro');
-            }}
-          >
-            Start New Survey
-          </button>
+          {submissionStatus !== 'success' && (
+            <button
+              className={`px-6 py-2 ${submissionStatus === 'submitting' ? 'bg-gray-400' :
+                submissionStatus === 'error' ? 'bg-red-600' :
+                  'bg-blue-600'
+                } text-white rounded-md hover:${submissionStatus === 'submitting' ? 'bg-gray-400' :
+                  submissionStatus === 'error' ? 'bg-red-700' :
+                    'bg-blue-700'
+                } transition-colors mr-3 flex items-center`}
+              onClick={handleSubmit}
+              disabled={isSubmitted || submissionStatus === 'submitting'}
+            >
+              {submissionStatus === 'submitting' && (
+                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              )}
+              {submissionStatus === 'submitting' ? 'Submitting...' :
+                submissionStatus === 'error' ? 'Try Again' :
+                  'Submit Results'}
+            </button>
+          )}
         </div>
       </div>
     );
@@ -753,7 +765,7 @@ export default function DXCore4Survey() {
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-6">
+      <div className="max-w-7xl mx-auto px-4 py-6">
         {/* Tabs */}
         <div className="flex justify-center mb-6">
           <button
